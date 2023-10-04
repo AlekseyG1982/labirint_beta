@@ -8,7 +8,7 @@
 
 HANDLE hConsole;
 
-void show_labirint(int* map[], int row, int col)
+void show_labirint(int* map[],int*monster[], int row, int col)
 {
 	std::cout << "\n";
 	for (int i = 0; i < row; i++)
@@ -42,6 +42,12 @@ void show_labirint(int* map[], int row, int col)
 				SetConsoleTextAttribute(hConsole, 10);
 				symbol = 'o';
 			}
+			
+			if(monster[i][j] ==1)
+			{
+				SetConsoleTextAttribute(hConsole, 4);
+				symbol = '*';
+			}
 
 			std::cout << symbol << " ";
 		}
@@ -50,7 +56,7 @@ void show_labirint(int* map[], int row, int col)
 	SetConsoleTextAttribute(hConsole, 15);
 }
 
-void show_labirint_chit(int* map[], int row, int col, int x, int y)
+void show_labirint_chit(int* map[],int *monster[], int row, int col, int x, int y)
 {
 
 	std::cout << "\n";
@@ -90,7 +96,11 @@ void show_labirint_chit(int* map[], int row, int col, int x, int y)
 				SetConsoleTextAttribute(hConsole, 4);
 				symbol = 'X';
 			}
-
+			if (monster[i][j] == 1)
+			{
+				SetConsoleTextAttribute(hConsole, 4);
+				symbol = '*';
+			}
 
 			std::cout << symbol << " ";
 		}
@@ -101,13 +111,23 @@ void show_labirint_chit(int* map[], int row, int col, int x, int y)
 
 void show_labirint_map(int* map[], int* map_real[], int row, int col, int x, int y)
 {
+	int n = 12; 
+	int x_min = x - n;
+	int x_max = x + n;
+	int y_min = y - n;
+	int y_max = y + n;
+
+	if (x_min <= 0) x_min = 1;
+	if (x_max > row - 3) x_max = row - 3;
+	if (y_min <= 0) y_min = 1;
+	if (y_max > col - 3) y_max = col - 3;
 	std::cout << "\n";
-		for (int i = 0; i < row; i++)
+	for (int i = x_min; i <= x_max; i++)
+	{
+		char symbol;
+		std::cout << "                         ";
+		for (int j = y_min; j <= y + n; j++)
 		{
-			char symbol;
-			std::cout << "                         ";
-			for (int j = 0; j < col; j++)
-			{
 				if (map[i][j] == 0)
 				{
 					if (map_real[i][j] == 1)
@@ -187,14 +207,15 @@ void show_labirint_map(int* map[], int* map_real[], int row, int col, int x, int
 	
 }
 
-void player_view(int* map[], int row, int col, int x, int y)
+void player_view(int* map[],int * monster[], int row, int col, int x, int y)
 {
+	int n = 2; //поле зрени€
 	std::cout << "\n\n\n\n";
-	for (int i = x - 2; i <= x + 2; i++)
+	for (int i = x - n; i <= x + n; i++)
 	{
 		char symbol;
 		std::cout << "                         ";
-		for (int j = y - 2; j <= y + 2; j++)
+		for (int j = y - n; j <= y + n; j++)
 		{
 			if (map[i][j] == 0)
 			{
@@ -222,6 +243,11 @@ void player_view(int* map[], int row, int col, int x, int y)
 				SetConsoleTextAttribute(hConsole, 10);
 				symbol = '*';
 			}
+			if (monster[i][j] == 1)
+			{
+				SetConsoleTextAttribute(hConsole, 4);
+				symbol = '*';
+			}
 
 			std::cout << symbol << " ";
 		}
@@ -230,10 +256,6 @@ void player_view(int* map[], int row, int col, int x, int y)
 
 	SetConsoleTextAttribute(hConsole, 15);
 }
-
-
-
-
 
 
 int main()
@@ -247,16 +269,18 @@ int main()
 	// 13фиол 14блед-желт 15белый 
 
 
-	int row = 24;
-	std::cout << "¬ведите размер лабиринта (квадрат рекомендовано не менее 24) ->";
-	std::cin >> row;
+	int row = 32;
+	//std::cout << "¬ведите размер лабиринта (квадрат рекомендовано не менее 24) ->";
+	//std::cin >> row;
 	//int levels = 5;
 	//std::cout << "¬вкдите количесьво уровней ->";
 	//std::cin >> levels;
 
-	int n = 5;
-	std::cout << "¬ведите соотношение коридоров и стен ( рекомендовано 4 или больше) ->";
-	std::cin >> n;
+	
+	//std::cout << "¬ведите соотношение коридоров и стен ( рекомендовано 3 или больше) ->";
+	//std::cin >> n;
+	
+	int n = 3; //+(row%100);
 	while (true)
 	{
 
@@ -278,6 +302,8 @@ int main()
 			}
 		}
 
+		//слой разведки
+
 		int** labirint_map = new int* [row];
 	
 		for (int i = 0; i < row; i++) labirint_map[i] = new int[col];
@@ -288,6 +314,17 @@ int main()
 						
 		}
 
+		//слой монстров
+
+		int** monster_map = new int* [row];
+
+		for (int i = 0; i < row; i++) monster_map[i] = new int[col];
+
+		for (int i = 0; i < row; i++)
+		{
+			for (int j = 0; j < col; j++) monster_map[i][j] = 0;
+
+		}
 
 		// входна€ группа
 
@@ -395,8 +432,29 @@ int main()
 			}
 
 		}
+		////////////////////////////////////////
 
-		show_labirint(labirint, row, col);
+		//генераци€ монстров
+
+		int num_monster = 1 + row * col / 500;
+
+		for (int i = 0; i < num_monster; i++)
+		{
+
+			while (true)
+			{
+				int monster_x = 4 + rand() % (row - 8);
+				int monster_y = 4 + rand() % (col - 8);
+
+				if (labirint[monster_x][monster_y] == 0 and monster_map[monster_x][monster_y] == 0)
+				{
+					monster_map[monster_x][monster_y] = 1;
+					break;
+				}
+			}
+		}
+
+		show_labirint(labirint, monster_map, row, col);
 		system("pause");
 
 		int player_x = enter_x;
@@ -407,7 +465,7 @@ int main()
 		while (true)
 		{
 			system("cls");
-			player_view(labirint, row, col, player_x, player_y);
+			player_view(labirint, monster_map, row, col, player_x, player_y);
 			char player_move;
 			if (player_location == 101)
 			{
@@ -418,7 +476,7 @@ int main()
 			std::cout << "8 - вврех 2 - вниз 4 - влево 6 - вправо\n";
 			player_move = _getch();
 			
-			if (player_move == 'c') { system("cls"); show_labirint_chit(labirint, row, col, player_x, player_y); player_move = _getch();}
+			if (player_move == 'c') { system("cls"); show_labirint_chit(labirint,monster_map, row, col, player_x, player_y); player_move = _getch();}
 			if (player_move == 'm') { system("cls"); show_labirint_map(labirint,labirint_map , row, col, player_x, player_y); player_move = _getch();}
 			if (player_move == '8')  player_x--;
 			if (player_move == '4')  player_y--;
@@ -437,16 +495,77 @@ int main()
 				system("pause");
 			}
 			// изменение статуса разведки
-			labirint_map[player_x][player_y] = 1;
-			labirint_map[player_x+1][player_y] = 1;
-			labirint_map[player_x-1][player_y] = 1;
-			labirint_map[player_x][player_y+1] = 1;
-			labirint_map[player_x][player_y+1] = 1;
-			labirint_map[player_x+1][player_y+1] = 1;
-			labirint_map[player_x-1][player_y-1] = 1;
-			labirint_map[player_x+1][player_y-1] = 1;
-			labirint_map[player_x-1][player_y+1] = 1;
+			for (int i = player_x - 2; i <= player_x + 2; i++)
+				for (int j = player_y - 2; j <= player_y + 2; j++) labirint_map[i][j] = 1;
+		
+			// изменение движени€ монстров\
 
+			for (int i = 0; i < num_monster ; i++)
+			{
+				for(int i=0;i<row;i++)
+					for (int j = 0; j < col; j++)
+					{
+						if (monster_map[i][j] == 1)
+						{
+							while (true)
+							{								
+								// что бы в углы не забивались алгоритм об€зательного выхода
+								/*
+								int count = 0;
+								int step;
+								if (labirint[i + 1][j] == 0) count++;
+								if (labirint[i - 1][j] == 0) count++;
+								if (labirint[i][j+1] == 0) count++;
+								if (labirint[i][j-1] == 0) count++;
+								
+								if (count > 3) step = 1 + rand() % 41;
+								else step = rand() % 5;
+								*/
+								int step = 1 + rand() % 41;
+								//if (step == 0) { monster_map[i][j] = 10; break; }
+								if (step > 0 and step <11)
+								{
+									if (labirint[i - 1][j] == 0 and monster_map[i - 1][j] == 0)
+									{
+										monster_map[i - 1][j] = 10;
+										monster_map[i][j] = 0;
+										break;
+									}
+								}
+								if (step > 11 and step < 21)
+								{
+									if (labirint[i + 1][j] == 0 and monster_map[i + 1][j] == 0)
+									{
+										monster_map[i + 1][j] = 10;
+										monster_map[i][j] = 0;
+										break;
+									}
+								}
+								if (step > 21 and step < 31)
+								{
+									if (labirint[i][j-1] == 0 and monster_map[i][j-1] == 0)
+									{
+										monster_map[i][j-1] = 10;
+										monster_map[i][j] = 0;
+										break;
+									}
+								}
+								if (step > 31 and step < 41)
+								{
+									if (labirint[i][j+1] == 0 and monster_map[i][j+1] == 0)
+									{
+										monster_map[i][j+1] = 10;
+										monster_map[i][j] = 0;
+										break;
+									}
+								}
+							}
+						}
+					}
+			}
+			for (int i = 0; i < row; i++)
+				for (int j = 0; j < col; j++)
+					if (monster_map[i][j] == 10) monster_map[i][j] = 1;
 
 		}
 		////////////////////////////////////
@@ -457,6 +576,9 @@ int main()
 
 		for (int i = 0; i < col; i++) delete[] labirint_map[i];
 		delete[] labirint_map;
+
+		for (int i = 0; i < col; i++) delete[] monster_map[i];
+		delete[] monster_map;
 				
 		row += 2;
 	}
