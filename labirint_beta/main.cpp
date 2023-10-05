@@ -8,6 +8,17 @@
 
 HANDLE hConsole;
 
+struct Monster
+{
+	int str = 5;
+	int agl = 5;
+	int end = 5;
+	int armor = 0;
+	int hp = end * 10;
+
+
+};
+
 void show_labirint(int* map[],int*monster[], int row, int col)
 {
 	std::cout << "\n";
@@ -257,6 +268,38 @@ void player_view(int* map[],int * monster[], int row, int col, int x, int y)
 	SetConsoleTextAttribute(hConsole, 15);
 }
 
+int plr_hit(int plr_str,int plr_agl, int plr_atk, int enemy_agl, int ememy_armor=0)
+{
+	int hit = 0;
+	int n = 3;
+	if (enemy_agl > plr_agl - n + rand() % (2 * n)) std::cout << "You are loose! " << "\n";
+	else
+	{
+		std::cout << "You are hit! " << "\n";
+		hit = plr_str - n + rand() % (2 * n) + plr_atk - ememy_armor;
+		if (hit < 0) hit = 0;
+		std::cout << "Damage - " <<hit<< "\n";
+	}
+	
+	return hit;
+	
+}
+int enm_hit(int enm_str, int enm_agl,  int plr_agl, int plr_armor,int enm_atk=0 )
+{
+	int hit = 0;
+	int n = 3;
+	if (plr_agl > enm_agl - n + rand() % (2 * n)) std::cout << "You are lucky gay! " << "\n";
+	else
+	{
+		std::cout << "A - A - Aaaa ! " << "\n";
+		hit = enm_str - n + rand() % (2 * n) + enm_atk - plr_armor;
+		if (hit < 0) hit = 0;
+		std::cout << "Damage - " << hit << "\n";
+	}
+
+	return hit;
+	
+}
 
 int main()
 {
@@ -436,7 +479,7 @@ int main()
 
 		//генерация монстров
 
-		int num_monster = 1 + row * col / 500;
+		int num_monster = 3 + row * col / 500;
 
 		for (int i = 0; i < num_monster; i++)
 		{
@@ -460,113 +503,177 @@ int main()
 		int player_x = enter_x;
 		int player_y = enter_y;
 
+		int plr_str = 5;
+		int plr_agl = 5;
+		int plr_end = 5;
+		int plr_int = 5;
+		int plr_hp_max = plr_end * 10;
+		int plr_hp = 50;
+		int plr_cargo_max = (plr_str + plr_end) * 2;
+		int plr_cargo=0;
+		int plr_mana_max = plr_int * 2;
+		int plr_mana=0;
+		int plr_coin = 0;
+		int plr_atk = 1;
+		int plr_armor = 1;
+		int plr_xp = 0;
+
+
 		int player_location = labirint[player_x][player_y];
+		int Day = 1;
 
-		while (true)
+		while(true)
 		{
-			system("cls");
-			player_view(labirint, monster_map, row, col, player_x, player_y);
-			char player_move;
-			if (player_location == 101)
-			{
-				std::cout << "5 - спустится вниз \n";
-				player_move = _getch();
-				if (player_move == '5') break;
-			}
-			std::cout << "8 - вврех 2 - вниз 4 - влево 6 - вправо\n";
-			player_move = _getch();
-			
-			if (player_move == 'c') { system("cls"); show_labirint_chit(labirint,monster_map, row, col, player_x, player_y); player_move = _getch();}
-			if (player_move == 'm') { system("cls"); show_labirint_map(labirint,labirint_map , row, col, player_x, player_y); player_move = _getch();}
-			if (player_move == '8')  player_x--;
-			if (player_move == '4')  player_y--;
-			if (player_move == '6')  player_y++;
-			if (player_move == '2')  player_x++;
+			int move_p=12;
 
-			player_location = labirint[player_x][player_y]; // проверка статуса перемещения
-
-			if (player_location == 9)
+			while (true)
 			{
-				std::cout << "ТУТ СТЕНА!!!";
-				if (player_move == '8')  player_x++;
-				if (player_move == '4')  player_y++;
-				if (player_move == '6')  player_y--;
-				if (player_move == '2')  player_x--;
-				system("pause");
-			}
-			// изменение статуса разведки
-			for (int i = player_x - 2; i <= player_x + 2; i++)
-				for (int j = player_y - 2; j <= player_y + 2; j++) labirint_map[i][j] = 1;
-		
-			// изменение движения монстров\
+				system("cls");
+				player_view(labirint, monster_map, row, col, player_x, player_y);
+				std::cout << "Days - " << Day << " Hours left - " << move_p << "\n";
+				char player_move;
+				if (player_location == 101)
+				{
+					std::cout << "5 - спустится вниз \n";
+					player_move = _getch();
+					if (player_move == '5') break;
+				}
+				if (monster_map[player_x][player_y] == 1)
+				{
+					std::cout << "5 - Figth \n";
+					player_move = _getch();
 
-			for (int i = 0; i < num_monster ; i++)
-			{
-				for(int i=0;i<row;i++)
-					for (int j = 0; j < col; j++)
+					if (player_move == '5')
 					{
-						if (monster_map[i][j] == 1)
+						
+						int monster_str = 3 + (-1 + rand() % 3);
+						int monster_agl = 3 + (-1 + rand() % 3);
+						int monster_end = 3 + (-1 + rand() % 3);
+						int monster_hp = monster_end * 10;
+						
+						std::cout << "Monster STR = " << monster_str << "  Monster AGL = " << monster_agl<<"  Monster END = " << monster_end<< "\n";
+						system("pause");
+
+						while (monster_hp >0)
 						{
-							while (true)
-							{								
-								// что бы в углы не забивались алгоритм обязательного выхода
-								/*
-								int count = 0;
-								int step;
-								if (labirint[i + 1][j] == 0) count++;
-								if (labirint[i - 1][j] == 0) count++;
-								if (labirint[i][j+1] == 0) count++;
-								if (labirint[i][j-1] == 0) count++;
-								
-								if (count > 3) step = 1 + rand() % 41;
-								else step = rand() % 5;
-								*/
-								int step = 1 + rand() % 41;
-								//if (step == 0) { monster_map[i][j] = 10; break; }
-								if (step > 0 and step <11)
+							std::cout << "You HP = " << plr_hp << "  Enemy HP = " << monster_hp << "\n";
+							system("pause");
+							monster_hp -= plr_hit(plr_atk,plr_agl,plr_atk,monster_agl);
+							plr_hp -= enm_hit(monster_str, monster_agl, plr_agl, plr_armor);
+
+						}
+						monster_map[player_x][player_y] = 0;
+					}
+
+				}
+				std::cout << "8 - вврех 2 - вниз 4 - влево 6 - вправо\n";
+				player_move = _getch();
+
+				if (player_move == 'c') { system("cls"); show_labirint_chit(labirint, monster_map, row, col, player_x, player_y); player_move = _getch(); }
+				if (player_move == 'm') { system("cls"); show_labirint_map(labirint, labirint_map, row, col, player_x, player_y); player_move = _getch(); }
+				if (player_move == '8')  player_x--;
+				if (player_move == '4')  player_y--;
+				if (player_move == '6')  player_y++;
+				if (player_move == '2')  player_x++;
+
+				player_location = labirint[player_x][player_y]; // проверка статуса перемещения
+
+				if (player_location == 9)
+				{
+					std::cout << "ТУТ СТЕНА!!!";
+					if (player_move == '8')  player_x++;
+					if (player_move == '4')  player_y++;
+					if (player_move == '6')  player_y--;
+					if (player_move == '2')  player_x--;
+					system("pause");
+					break;
+				}
+				move_p--;
+				// изменение статуса разведки
+				for (int i = player_x - 2; i <= player_x + 2; i++)
+					for (int j = player_y - 2; j <= player_y + 2; j++) labirint_map[i][j] = 1;
+
+				// изменение движения монстров
+
+				if (move_p % 2 == 0)
+				{
+					for (int i = 0; i < num_monster; i++)
+					{
+						for (int i = 0; i < row; i++)
+							for (int j = 0; j < col; j++)
+							{
+								if (monster_map[i][j] == 1)
 								{
-									if (labirint[i - 1][j] == 0 and monster_map[i - 1][j] == 0)
+									while (true)
 									{
-										monster_map[i - 1][j] = 10;
-										monster_map[i][j] = 0;
-										break;
-									}
-								}
-								if (step > 11 and step < 21)
-								{
-									if (labirint[i + 1][j] == 0 and monster_map[i + 1][j] == 0)
-									{
-										monster_map[i + 1][j] = 10;
-										monster_map[i][j] = 0;
-										break;
-									}
-								}
-								if (step > 21 and step < 31)
-								{
-									if (labirint[i][j-1] == 0 and monster_map[i][j-1] == 0)
-									{
-										monster_map[i][j-1] = 10;
-										monster_map[i][j] = 0;
-										break;
-									}
-								}
-								if (step > 31 and step < 41)
-								{
-									if (labirint[i][j+1] == 0 and monster_map[i][j+1] == 0)
-									{
-										monster_map[i][j+1] = 10;
-										monster_map[i][j] = 0;
-										break;
+										// что бы в углы не забивались алгоритм обязательного выхода
+										/*
+										int count = 0;
+										int step;
+										if (labirint[i + 1][j] == 0) count++;
+										if (labirint[i - 1][j] == 0) count++;
+										if (labirint[i][j+1] == 0) count++;
+										if (labirint[i][j-1] == 0) count++;
+
+										if (count > 3) step = 1 + rand() % 41;
+										else step = rand() % 5;
+										*/
+										int step = 1 + rand() % 41;
+										//if (step == 0) { monster_map[i][j] = 10; break; }
+										if (step > 0 and step < 11)
+										{
+											if (labirint[i - 1][j] == 0 and monster_map[i - 1][j] == 0)
+											{
+												monster_map[i - 1][j] = 10;
+												monster_map[i][j] = 0;
+												break;
+											}
+										}
+										if (step > 11 and step < 21)
+										{
+											if (labirint[i + 1][j] == 0 and monster_map[i + 1][j] == 0)
+											{
+												monster_map[i + 1][j] = 10;
+												monster_map[i][j] = 0;
+												break;
+											}
+										}
+										if (step > 21 and step < 31)
+										{
+											if (labirint[i][j - 1] == 0 and monster_map[i][j - 1] == 0)
+											{
+												monster_map[i][j - 1] = 10;
+												monster_map[i][j] = 0;
+												break;
+											}
+										}
+										if (step > 31 and step < 41)
+										{
+											if (labirint[i][j + 1] == 0 and monster_map[i][j + 1] == 0)
+											{
+												monster_map[i][j + 1] = 10;
+												monster_map[i][j] = 0;
+												break;
+											}
+										}
 									}
 								}
 							}
-						}
 					}
-			}
-			for (int i = 0; i < row; i++)
-				for (int j = 0; j < col; j++)
-					if (monster_map[i][j] == 10) monster_map[i][j] = 1;
+					for (int i = 0; i < row; i++)
+						for (int j = 0; j < col; j++)
+							if (monster_map[i][j] == 10) monster_map[i][j] = 1;
+				}
+				else
+					if (move_p < 1)
+					{
+						Day++;
+						break;
+					}
 
+
+			}
+			if (player_location == 101) break;
 		}
 		////////////////////////////////////
 
